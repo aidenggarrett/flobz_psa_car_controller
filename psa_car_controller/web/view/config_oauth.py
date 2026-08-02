@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 def setup_config_manual_layout():
     return dbc.Col(md=12, lg=2, className="m-3", children=[
         dbc.Row(html.H2('Connection to PSA (Advanced)')),
-        dbc.Row(html.A("Please follow the instructions here.", href="https://github.com/flobz/psa_car_controller/discussions/779")),
+        dbc.Row(html.A("Please follow the instructions here.",
+                       href="https://github.com/flobz/psa_car_controller/discussions/779")),
         dbc.Row(className="ms-2", children=[
             dbc.Form([
                 html.Div(className="mb-3", children=[
@@ -52,6 +53,11 @@ def setup_config_manual_layout():
                     dbc.FormText("Enter PSA OAuth Code", color="secondary")
                 ]),
                 dbc.Row(dbc.Button("Submit", color="primary", id="finish-oauth")),
+                dcc.Loading(
+                    id="loading-2",
+                    children=[html.Div([html.Div(id="oauth-result")])],
+                    type="circle",
+                ),
             ])
         ]),
     ])
@@ -121,6 +127,8 @@ def finish_oauth(n_clicks, code):  # pylint: disable=unused-argument
     if ctx.triggered:
         try:
             config_views.INITIAL_SETUP.connect(code)
+            config_views.app.myp = config_views.INITIAL_SETUP.psacc
+            config_views.app.is_good = True
             return dbc.Alert(["PSA login finish !", html.A(" Go to otp config",
                              href=dash_app.config.requests_pathname_prefix + "config_otp")], color="success")
         except Exception as e:
